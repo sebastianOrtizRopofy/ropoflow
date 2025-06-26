@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_b3caa1cd4f4c4170a360ee93a1f63e87 }}/desarrolloropofy/n8n-custom:${{ github.sha }}
+        tags: desarrolloropofy/n8n-custom:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
