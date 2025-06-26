@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://index.docker.io/v1/
-        username: ${{ secrets.AzureAppService_ContainerUsername_b3caa1cd4f4c4170a360ee93a1f63e87 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_84e2d1538f534b9486ced1399301ebc0 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_8966d70e54214176ae21032f88337c2a }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_84ba5fb0413944db84819210608bbd60 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: desarrolloropofy/n8n-custom:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_8966d70e54214176ae21032f88337c2a }}/desarrolloropofy/n8n-custom:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'ropoflow'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_711766dfaf6c4a1f99bc19f076a9bc14 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_b3caa1cd4f4c4170a360ee93a1f63e87 }}/desarrolloropofy/n8n-custom:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_2ed5b91c332a4080855c4942401ae69c }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_8966d70e54214176ae21032f88337c2a }}/desarrolloropofy/n8n-custom:${{ github.sha }}'
