@@ -4,6 +4,8 @@ FROM node:22-slim
 ENV N8N_BASIC_AUTH_ACTIVE=true
 ENV N8N_BASIC_AUTH_USER=admin
 ENV N8N_BASIC_AUTH_PASSWORD=admin
+ENV N8N_WEBHOOK_URL=https://ropoflow-c4acfzgsbqa5bfad.canadacentral-01.azurewebsites.net/
+ENV N8N_ENDPOINT_REST=https://ropoflow-c4acfzgsbqa5bfad.canadacentral-01.azurewebsites.net/
 
 RUN apt-get update && apt-get install -y \
     build-essential python3 git curl && apt-get clean
