@@ -21,6 +21,8 @@ RUN pnpm install --no-frozen-lockfile
 
 # Antes del build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV WEBHOOK_URL="https://ropoflow-c4acfzgsbqa5bfad.canadacentral-01.azurewebsites.net/"   # <--- Agrega esta línea aquí
+
 # Compilar
 RUN pnpm build
 
