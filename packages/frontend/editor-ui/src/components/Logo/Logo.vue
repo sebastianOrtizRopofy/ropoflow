@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { FrontendSettings } from '@n8n/api-types';
-import { computed, onMounted, useCssModule, useTemplateRef } from 'vue';
-import { useFavicon } from '@vueuse/core';
+import { ref, computed, useCssModule, onMounted } from 'vue';
 
-import LogoIcon from './logo-icon.svg';
-import LogoText from './logo-text.svg';
+import LogoIcon from '../../../public/static/n8n-logo.png';
+import LogoIconLight from '../../../public/static/n8n-logo.png';
+import CollapsedLogo from '../../../public/static/collapsed_sin_fondo.png';
 
 const props = defineProps<
 	(
@@ -22,12 +22,23 @@ const props = defineProps<
 
 const { location, releaseChannel } = props;
 
-const showLogoText = computed(() => {
-	if (location === 'authView') return true;
-	return !props.collapsed;
+const $style = useCssModule();
+
+const isDark = ref(false);
+onMounted(() => {
+	isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+		isDark.value = e.matches;
+	});
 });
 
-const $style = useCssModule();
+const logoSrc = computed(() => {
+	if (location === 'sidebar' && (props as any).collapsed) {
+		return CollapsedLogo;
+	}
+	return isDark.value ? LogoIcon : LogoIconLight;
+});
+
 const containerClasses = computed(() => {
 	if (location === 'authView') {
 		return [$style.logoContainer, $style.authView];
@@ -35,30 +46,14 @@ const containerClasses = computed(() => {
 	return [
 		$style.logoContainer,
 		$style.sidebar,
-		props.collapsed ? $style.sidebarCollapsed : $style.sidebarExpanded,
+		(props as any).collapsed ? $style.sidebarCollapsed : $style.sidebarExpanded,
 	];
-});
-
-const svg = useTemplateRef<{ $el: Element }>('logo');
-onMounted(() => {
-	if (releaseChannel === 'stable' || !('createObjectURL' in URL)) return;
-
-	const logoEl = svg.value!.$el;
-
-	// Change the logo fill color inline, so that favicon can also use it
-	const logoColor = releaseChannel === 'dev' ? '#838383' : '#E9984B';
-	logoEl.querySelector('path')?.setAttribute('fill', logoColor);
-
-	// Reuse the SVG as favicon
-	const blob = new Blob([logoEl.outerHTML], { type: 'image/svg+xml' });
-	useFavicon(URL.createObjectURL(blob));
 });
 </script>
 
 <template>
 	<div :class="containerClasses" data-test-id="n8n-logo">
-		<LogoIcon ref="logo" :class="$style.logo" />
-		<LogoText v-if="showLogoText" :class="$style.logoText" />
+		<img :src="logoSrc" :alt="'Logo'" :class="$style.logo" />
 		<slot />
 	</div>
 </template>
@@ -80,6 +75,12 @@ onMounted(() => {
 .authView {
 	transform: scale(2);
 	margin-bottom: var(--spacing-xl);
+}
+
+.logo {
+	max-width: 100px;
+	width: 100px;
+	height: auto !important;
 }
 
 .logo,

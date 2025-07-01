@@ -116,6 +116,7 @@
     }
   },
   "dependencies": {
-    "n8n-nodes-exampleNode": "link:../../../Library/pnpm/global/5/node_modules/n8n-nodes-exampleNode"
+    "n8n-nodes-exampleNode": "link:../../../Library/pnpm/global/5/node_modules/n8n-nodes-exampleNode",
+    "tiktoken-node": "^0.0.7"
   }
 }
