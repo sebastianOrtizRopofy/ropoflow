@@ -8,7 +8,7 @@ ENV N8N_BASIC_AUTH_PASSWORD=admin
 # Configuración de DB
 ENV DB_TYPE=postgresdb
 ENV DB_POSTGRESDB_DATABASE=ropoflow-prod
-ENV DB_POSTGRESDB_USER=ropofy@databases-ropoflow
+ENV DB_POSTGRESDB_USER=ropofy
 ENV DB_POSTGRESDB_PASSWORD=421gy7NR3,Xn
 ENV DB_POSTGRESDB_HOST=databases-ropoflow.postgres.database.azure.com
 ENV DB_POSTGRESDB_PORT=5432
