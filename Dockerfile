@@ -57,6 +57,9 @@ ENV N8N_SMTP_PASS=KqMw3fIxUJ4U5BkL
 ENV N8N_SMTP_SENDER="waas@noreply.waasropofy.com"
 ENV N8N_SMTP_SSL=false
 
+#ENCRYPTION
+ENV N8N_ENCRYPTION_KEY=3kJ8o2SLXjHs7G1Nz9Bd6T0AqWmZ4yVc
+
 # Configuración de webhook público
 ENV WEBHOOK_URL="https://ropoflow-c4acfzgsbqa5bfad.canadacentral-01.azurewebsites.net/"
 
