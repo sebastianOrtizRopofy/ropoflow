@@ -19,7 +19,7 @@ import {
 	getPipelines,
 	getPipelineStages,
 	getUsers,
-	highLevelApiPagination,
+	ropofyApiPagination,
 } from './GenericFunctions';
 
 const resources: INodeProperties[] = [
@@ -52,22 +52,22 @@ const resources: INodeProperties[] = [
 ];
 
 const versionDescription: INodeTypeDescription = {
-	displayName: 'HighLevel',
-	name: 'highLevel',
-	icon: 'file:highLevel.svg',
+	displayName: 'Ropofy',
+	name: 'ropofy',
+	icon: 'file:ropofy.svg',
 	group: ['transform'],
 	version: 2,
-	description: 'Consume HighLevel API v2',
+	description: 'Consume Ropofy API v2',
 	subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 	defaults: {
-		name: 'HighLevel',
+		name: 'Ropofy',
 	},
 	usableAsTool: true,
 	inputs: [NodeConnectionTypes.Main],
 	outputs: [NodeConnectionTypes.Main],
 	credentials: [
 		{
-			name: 'highLevelOAuth2Api',
+			name: 'ropofyOAuth2Api',
 			required: true,
 		},
 	],
@@ -80,7 +80,7 @@ const versionDescription: INodeTypeDescription = {
 		},
 	},
 	requestOperations: {
-		pagination: highLevelApiPagination,
+		pagination: ropofyApiPagination,
 	},
 	properties: [
 		...resources,
@@ -96,7 +96,7 @@ const versionDescription: INodeTypeDescription = {
 	],
 };
 
-export class HighLevelV2 implements INodeType {
+export class RopofyV2 implements INodeType {
 	description: INodeTypeDescription;
 
 	constructor(baseDescription: INodeTypeBaseDescription) {
@@ -119,11 +119,11 @@ export class HighLevelV2 implements INodeType {
 				filter?: string,
 			): Promise<INodeListSearchResult> {
 				const { locationId } =
-					((await this.getCredentials('highLevelOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+					((await this.getCredentials('ropofyOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
 
 				const responseData: IDataObject = (await this.helpers.httpRequestWithAuthentication.call(
 					this,
-					'highLevelOAuth2Api',
+					'ropofyOAuth2Api',
 					{
 						// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 						url: `https://services.leadconnectorhq.com/locations/${locationId}/customFields?model=contact`,
@@ -156,11 +156,11 @@ export class HighLevelV2 implements INodeType {
 				filter?: string,
 			): Promise<INodeListSearchResult> {
 				const { locationId } =
-					((await this.getCredentials('highLevelOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+					((await this.getCredentials('ropofyOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
 
 				const responseData: IDataObject = (await this.helpers.httpRequestWithAuthentication.call(
 					this,
-					'highLevelOAuth2Api',
+					'ropofyOAuth2Api',
 					{
 						// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 						url: `https://services.leadconnectorhq.com/locations/${locationId}/timezones`,

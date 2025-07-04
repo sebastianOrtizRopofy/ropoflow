@@ -1,15 +1,15 @@
 import type { ICredentialType, INodeProperties, Icon } from 'n8n-workflow';
 
-export class HighLevelOAuth2Api implements ICredentialType {
-	name = 'highLevelOAuth2Api';
+export class RopofyOAuth2Api implements ICredentialType {
+	name = 'ropofyOAuth2Api';
 
 	extends = ['oAuth2Api'];
 
-	displayName = 'HighLevel OAuth2 API';
+	displayName = 'Ropofy OAuth2 API';
 
-	documentationUrl = 'highLevel';
+	documentationUrl = 'ropofy';
 
-	icon: Icon = 'file:icons/highLevel.svg';
+	icon: Icon = 'file:icons/ropofy.svg';
 
 	properties: INodeProperties[] = [
 		{

@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.highLevel",
+	"node": "n8n-nodes-base.ropofy",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Marketing", "Sales"],

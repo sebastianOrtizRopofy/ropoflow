@@ -1,8 +1,8 @@
 import type { IExecutePaginationFunctions } from 'n8n-workflow';
 
-import { highLevelApiPagination } from '../GenericFunctions';
+import { ropofyApiPagination } from '../GenericFunctions';
 
-describe('highLevelApiPagination', () => {
+describe('ropofyApiPagination', () => {
 	let mockContext: Partial<IExecutePaginationFunctions>;
 
 	beforeEach(() => {
@@ -38,7 +38,7 @@ describe('highLevelApiPagination', () => {
 
 		const requestData = { options: { qs: {} } } as any;
 
-		const result = await highLevelApiPagination.call(
+		const result = await ropofyApiPagination.call(
 			mockContext as IExecutePaginationFunctions,
 			requestData,
 		);
@@ -68,7 +68,7 @@ describe('highLevelApiPagination', () => {
 
 		const requestData = { options: { qs: {} } } as any;
 
-		const result = await highLevelApiPagination.call(
+		const result = await ropofyApiPagination.call(
 			mockContext as IExecutePaginationFunctions,
 			requestData,
 		);
@@ -93,7 +93,7 @@ describe('highLevelApiPagination', () => {
 
 		const requestData = { options: { qs: {} } } as any;
 
-		const result = await highLevelApiPagination.call(
+		const result = await ropofyApiPagination.call(
 			mockContext as IExecutePaginationFunctions,
 			requestData,
 		);

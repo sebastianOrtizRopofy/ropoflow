@@ -1,6 +1,6 @@
-import { highLevelApiRequest } from '../GenericFunctions';
+import { ropofyApiRequest } from '../GenericFunctions';
 
-describe('GenericFunctions - highLevelApiRequest', () => {
+describe('GenericFunctions - ropofyApiRequest', () => {
 	let mockContext: any;
 	let mockHttpRequestWithAuthentication: jest.Mock;
 
@@ -24,7 +24,7 @@ describe('GenericFunctions - highLevelApiRequest', () => {
 		const url = 'https://custom-url.example.com/api';
 		const option = { headers: { Authorization: 'Bearer test-token' } };
 
-		const result = await highLevelApiRequest.call(
+		const result = await ropofyApiRequest.call(
 			mockContext,
 			method,
 			resource,
@@ -34,7 +34,7 @@ describe('GenericFunctions - highLevelApiRequest', () => {
 			option,
 		);
 
-		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('highLevelOAuth2Api', {
+		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('ropofyOAuth2Api', {
 			headers: { Authorization: 'Bearer test-token' },
 			method: 'POST',
 			body: { key: 'value' },
@@ -53,9 +53,9 @@ describe('GenericFunctions - highLevelApiRequest', () => {
 		const method = 'GET';
 		const resource = '/default-resource';
 
-		const result = await highLevelApiRequest.call(mockContext, method, resource);
+		const result = await ropofyApiRequest.call(mockContext, method, resource);
 
-		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('highLevelOAuth2Api', {
+		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('ropofyOAuth2Api', {
 			headers: {
 				'Content-Type': 'application/json',
 				Version: '2021-07-28',
@@ -76,9 +76,9 @@ describe('GenericFunctions - highLevelApiRequest', () => {
 		const resource = '/example-resource';
 		const body = {};
 
-		const result = await highLevelApiRequest.call(mockContext, method, resource, body);
+		const result = await ropofyApiRequest.call(mockContext, method, resource, body);
 
-		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('highLevelOAuth2Api', {
+		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('ropofyOAuth2Api', {
 			headers: {
 				'Content-Type': 'application/json',
 				Version: '2021-07-28',
@@ -99,9 +99,9 @@ describe('GenericFunctions - highLevelApiRequest', () => {
 		const resource = '/example-resource';
 		const qs = {};
 
-		const result = await highLevelApiRequest.call(mockContext, method, resource, {}, qs);
+		const result = await ropofyApiRequest.call(mockContext, method, resource, {}, qs);
 
-		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('highLevelOAuth2Api', {
+		expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith('ropofyOAuth2Api', {
 			headers: {
 				'Content-Type': 'application/json',
 				Version: '2021-07-28',

@@ -5,12 +5,12 @@ import type {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class HighLevelApi implements ICredentialType {
-	name = 'highLevelApi';
+export class RopofyApi implements ICredentialType {
+	name = 'ropofyApi';
 
-	displayName = 'HighLevel API';
+	displayName = 'Ropofy API';
 
-	documentationUrl = 'highLevel';
+	documentationUrl = 'ropofy';
 
 	properties: INodeProperties[] = [
 		{

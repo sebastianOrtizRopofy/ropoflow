@@ -76,6 +76,9 @@ export class OAuth2CredentialController extends AbstractOAuthController {
 		const oAuthObj = new ClientOAuth2(oAuthOptions);
 		const returnUri = oAuthObj.code.getUri();
 
+		//console.log('[OAUTH2 DEBUG] HighLevel Auth URL:', returnUri);
+		//console.log('[OAUTH2 DEBUG] oAuthOptions:', oAuthOptions);
+
 		this.logger.debug('OAuth2 authorization url created for credential', {
 			userId: req.user.id,
 			credentialId: credential.id,

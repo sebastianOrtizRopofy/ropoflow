@@ -116,7 +116,7 @@
     }
   },
   "dependencies": {
-    "n8n-nodes-exampleNode": "link:../../../Library/pnpm/global/5/node_modules/n8n-nodes-exampleNode",
-    "tiktoken-node": "^0.0.7"
+    "tiktoken-node": "^0.0.7",
+    "n8n-nodes-ropoflow": "link:./nodes-custom/n8n-nodes-ropoflow"
   }
 }

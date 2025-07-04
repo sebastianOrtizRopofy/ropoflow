@@ -740,6 +740,19 @@ const getAllProperties: INodeProperties[] = [
 		description: 'Max number of results to return',
 	},
 	{
+		displayName: 'Delay Pagination (ms)',
+		name: 'delayPagination',
+		type: 'number',
+		default: 0,
+		description: 'Delay in milliseconds between paginated requests',
+		displayOptions: {
+			show: {
+				resource: ['contact'],
+				operation: ['getAll'],
+			},
+		},
+	},
+	{
 		displayName: 'Filters',
 		name: 'filters',
 		type: 'collection',
