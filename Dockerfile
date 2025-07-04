@@ -19,7 +19,7 @@ COPY . .
 COPY .npmrc .npmrc
 
 # Copiar tu nodo custom al contenedor (ajusta ruta si lo necesitas)
-COPY nodes-custom/n8n-nodes-ropoflow /app/nodes-custom/n8n-nodes-ropoflow
+#COPY nodes-custom/n8n-nodes-ropoflow /app/nodes-custom/n8n-nodes-ropoflow
 
 # Instalar dependencias del proyecto
 RUN pnpm install --no-frozen-lockfile
@@ -46,7 +46,7 @@ ENV DB_POSTGRESDB_SSL_ENABLED=true
 ENV DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED=false
 
 # Configuración de runners y extensiones
-ENV N8N_CUSTOM_EXTENSIONS=/app/nodes-custom/n8n-nodes-ropoflow
+#ENV N8N_CUSTOM_EXTENSIONS=/app/nodes-custom/n8n-nodes-ropoflow
 ENV N8N_RUNNERS_ENABLED=true
 
 # Configuración de correo SMTP para n8n
