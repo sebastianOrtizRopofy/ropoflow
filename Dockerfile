@@ -19,7 +19,7 @@ COPY . .
 COPY .npmrc .npmrc
 
 # Copiar tu nodo custom al contenedor (ajusta ruta si lo necesitas)
-COPY nodes-custom/n8n-nodes-impulsa /app/nodes-custom/n8n-nodes-impulsa
+COPY nodes-custom/n8n-nodes-impulsa /app/nodes-custom/n8n-nodes-ropoflow
 
 # Instalar dependencias del proyecto
 RUN pnpm install --no-frozen-lockfile
