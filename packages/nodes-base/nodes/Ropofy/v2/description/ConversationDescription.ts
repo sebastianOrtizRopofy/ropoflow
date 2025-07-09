@@ -20,6 +20,16 @@ export const conversationOperations: INodeProperties[] = [
 						method: 'GET',
 						url: '/conversations/search',
 					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'conversations',
+								},
+							},
+						],
+					},
 				},
 				action: 'Get many conversations',
 			},
@@ -35,7 +45,6 @@ export const conversationFields: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Contact ID to search conversations for',
 		displayOptions: {
 			show: {
 				resource: ['conversation'],
@@ -55,7 +64,6 @@ export const conversationFields: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Location ID',
 		displayOptions: {
 			show: {
 				resource: ['conversation'],
@@ -73,8 +81,11 @@ export const conversationFields: INodeProperties[] = [
 		displayName: 'Limit',
 		name: 'limit',
 		type: 'number',
+		typeOptions: {
+			minValue: 1,
+		},
 		default: 20,
-		description: 'Max number of conversations to return',
+		description: 'Max number of results to return',
 		displayOptions: {
 			show: {
 				resource: ['conversation'],
