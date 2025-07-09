@@ -14,6 +14,8 @@ import { calendarFields, calendarOperations } from './description/CalendarDescri
 import { contactFields, contactNotes, contactOperations } from './description/ContactDescription';
 import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
 import { taskFields, taskOperations } from './description/TaskDescription';
+import { conversationOperations, conversationFields } from './description/ConversationDescription';
+import { messageOperations, messageFields } from './description/MessageDescription';
 import {
 	getContacts,
 	getPipelines,
@@ -44,6 +46,14 @@ const resources: INodeProperties[] = [
 			{
 				name: 'Calendar',
 				value: 'calendar',
+			},
+			{
+				name: 'Conversation',
+				value: 'conversation',
+			},
+			{
+				name: 'Message',
+				value: 'message',
 			},
 		],
 		default: 'contact',
@@ -93,6 +103,10 @@ const versionDescription: INodeTypeDescription = {
 		...taskFields,
 		...calendarOperations,
 		...calendarFields,
+		...conversationOperations,
+		...conversationFields,
+		...messageOperations,
+		...messageFields,
 	],
 };
 

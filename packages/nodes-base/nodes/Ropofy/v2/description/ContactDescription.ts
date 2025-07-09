@@ -6,7 +6,15 @@ import {
 	addNotePostReceiveAction,
 	splitTagsPreSendAction,
 	validEmailAndPhonePreSendAction,
+	contactSearchPreSendAction,
+	ropofyApiSearchPagination,
 } from '../GenericFunctions';
+
+// --- PRUEBA MÍNIMA DE PAGINACIÓN PERSONALIZADA ---
+export async function testPagination(this: any, requestData: any): Promise<any[]> {
+	console.log('¡Paginación personalizada ejecutada!');
+	return [];
+}
 
 export const contactOperations: INodeProperties[] = [
 	{
@@ -130,6 +138,20 @@ export const contactOperations: INodeProperties[] = [
 					},
 				},
 				action: 'Update a contact',
+			},
+			{
+				name: 'Search Contacts',
+				value: 'search',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '=/contacts/search',
+					},
+					send: {
+						preSend: [contactSearchPreSendAction],
+					},
+				},
+				action: 'Search contacts con filtros avanzados',
 			},
 		],
 		default: 'create',
@@ -779,6 +801,33 @@ const getAllProperties: INodeProperties[] = [
 					},
 				},
 			},
+			// NUEVOS CAMPOS DE FECHA Y CHECKS
+			{
+				displayName: 'Start Date',
+				name: 'startDate',
+				type: 'dateTime',
+				default: '',
+				description: 'Fecha de inicio para filtrar contactos (formato ISO)',
+			},
+			{
+				displayName: 'End Date',
+				name: 'endDate',
+				type: 'dateTime',
+				default: '',
+				description: 'Fecha de fin para filtrar contactos (formato ISO)',
+			},
+			{
+				displayName: 'Filtrar por fecha de creación (dateAdded)',
+				name: 'filterByDateAdded',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Filtrar por fecha de actualización (dateUpdated)',
+				name: 'filterByDateUpdated',
+				type: 'boolean',
+				default: false,
+			},
 		],
 	},
 	{
@@ -842,6 +891,201 @@ const getAllProperties: INodeProperties[] = [
 	},
 ];
 
+const searchProperties: INodeProperties[] = [
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+		displayOptions: {
+			show: {
+				resource: ['contact'],
+				operation: ['search'],
+			},
+		},
+		routing: {
+			send: {
+				paginate: '={{ $value }}',
+			},
+			operations: {
+				pagination: ropofyApiSearchPagination,
+			},
+		},
+	},
+	{
+		displayName: 'Page Limit',
+		name: 'pageLimit',
+		type: 'number',
+		default: 20,
+		required: true,
+		description: 'Number of results per page',
+		displayOptions: {
+			show: {
+				resource: ['contact'],
+				operation: ['search'],
+			},
+		},
+	},
+	{
+		displayName: 'Filters',
+		name: 'filters',
+		type: 'fixedCollection',
+		placeholder: 'Add Filter',
+		default: {},
+		typeOptions: {
+			multipleValues: true,
+		},
+		displayOptions: {
+			show: {
+				resource: ['contact'],
+				operation: ['search'],
+			},
+		},
+		options: [
+			{
+				name: 'filter',
+				displayName: 'Filter',
+				values: [
+					{
+						displayName: 'Field',
+						name: 'field',
+						type: 'string',
+						default: '',
+						description: 'Field to filter by (e.g. firstNameLowerCase, dnd, etc.)',
+					},
+					{
+						displayName: 'Operator',
+						name: 'operator',
+						type: 'options',
+						options: [
+							{ name: 'Contains', value: 'contains' },
+							{ name: 'Equals', value: 'eq' },
+							{ name: 'Greater Than', value: 'gt' },
+							{ name: 'In', value: 'in' },
+							{ name: 'Less Than', value: 'lt' },
+							{ name: 'Not Equals', value: 'ne' },
+							{ name: 'Range', value: 'range' },
+						],
+						default: 'eq',
+					},
+					{
+						displayName: 'Value',
+						name: 'value',
+						type: 'string',
+						default: '',
+						description: 'Value for the filter (for range, use JSON: {"gt":..., "lt":...})',
+					},
+				],
+			},
+			{
+				name: 'group',
+				displayName: 'Group',
+				values: [
+					{
+						displayName: 'Group Operator',
+						name: 'group',
+						type: 'options',
+						options: [
+							{ name: 'AND', value: 'AND' },
+							{ name: 'OR', value: 'OR' },
+						],
+						default: 'AND',
+					},
+					{
+						displayName: 'Filters',
+						name: 'filters',
+						type: 'json',
+						default: '',
+						description: 'Array of filters or groups (JSON)',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Date Filters',
+		name: 'dateFilters',
+		type: 'collection',
+		placeholder: 'Add Date Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['contact'],
+				operation: ['search'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Start Date',
+				name: 'startDate',
+				type: 'dateTime',
+				default: '',
+				description: 'Start date for filtering (ISO format)',
+			},
+			{
+				displayName: 'End Date',
+				name: 'endDate',
+				type: 'dateTime',
+				default: '',
+				description: 'End date for filtering (ISO format)',
+			},
+			{
+				displayName: 'Filter By Created Date (Date Added)',
+				name: 'filterByDateAdded',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Filter By Updated Date (Date Updated)',
+				name: 'filterByDateUpdated',
+				type: 'boolean',
+				default: false,
+			},
+		],
+	},
+	{
+		displayName: 'Sort',
+		name: 'sort',
+		type: 'fixedCollection',
+		placeholder: 'Add Sort',
+		default: {},
+		typeOptions: {
+			multipleValues: true,
+		},
+		displayOptions: {
+			show: {
+				resource: ['contact'],
+				operation: ['search'],
+			},
+		},
+		options: [
+			{
+				name: 'sort',
+				displayName: 'Sort',
+				values: [
+					{
+						displayName: 'Field',
+						name: 'field',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Direction',
+						name: 'direction',
+						type: 'options',
+						options: [
+							{ name: 'Ascending', value: 'asc' },
+							{ name: 'Descending', value: 'desc' },
+						],
+						default: 'desc',
+					},
+				],
+			},
+		],
+	},
+];
+
 const lookupProperties: INodeProperties[] = [
 	{
 		displayName: 'Email',
@@ -879,6 +1123,7 @@ export const contactFields: INodeProperties[] = [
 	...updateProperties,
 	...deleteProperties,
 	...getProperties,
-	...getAllProperties,
+	...searchProperties, // <-- Ahora antes
+	...getAllProperties, // <-- Ahora después
 	...lookupProperties,
 ];

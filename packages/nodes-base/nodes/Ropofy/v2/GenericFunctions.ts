@@ -132,18 +132,65 @@ export async function addLocationIdPreSendAction(
 	const resource = this.getNodeParameter('resource') as string;
 	const operation = this.getNodeParameter('operation') as string;
 
-	console.log('[Ropofy] addLocationIdPreSendAction:', {
+	/* console.log('[Ropofy] addLocationIdPreSendAction:', {
 		locationId,
 		resource,
 		operation,
 		qs: requestOptions.qs,
 		body: requestOptions.body,
-	});
+	}); */
 
 	if (resource === 'contact') {
 		if (operation === 'getAll') {
 			requestOptions.qs = requestOptions.qs ?? {};
 			Object.assign(requestOptions.qs, { locationId });
+
+			// --- INICIO FILTRO DE FECHAS EN BODY ---
+			const filters = this.getNodeParameter('filters', {}) as any;
+			const startDate = filters.startDate;
+			const endDate = filters.endDate;
+			const filterByDateAdded = filters.filterByDateAdded;
+			const filterByDateUpdated = filters.filterByDateUpdated;
+
+			const filterArray: any[] = [];
+			if (startDate && endDate) {
+				if (filterByDateAdded) {
+					filterArray.push({
+						field: 'dateAdded',
+						operator: 'range',
+						value: {
+							gt: startDate,
+							lt: endDate,
+						},
+					});
+				}
+				if (filterByDateUpdated) {
+					filterArray.push({
+						field: 'dateUpdated',
+						operator: 'range',
+						value: {
+							gt: startDate,
+							lt: endDate,
+						},
+					});
+				}
+			}
+			if (filterArray.length > 0) {
+				if (
+					typeof requestOptions.body !== 'object' ||
+					requestOptions.body === null ||
+					Array.isArray(requestOptions.body)
+				) {
+					requestOptions.body = {};
+				}
+				(requestOptions.body as any).filters = [
+					{
+						group: 'OR',
+						filters: filterArray,
+					},
+				];
+			}
+			// --- FIN FILTRO DE FECHAS EN BODY ---
 		}
 		if (operation === 'create') {
 			requestOptions.body = requestOptions.body ?? {};
@@ -162,10 +209,18 @@ export async function addLocationIdPreSendAction(
 		}
 	}
 
-	console.log('[Ropofy] addLocationIdPreSendAction - FINAL:', {
+	// DEBUG: Mostrar el body final antes de retornar
+	if (resource === 'contact' && operation === 'getAll') {
+		console.log(
+			'[Ropofy][DEBUG] Body final enviado en getAll contactos:',
+			JSON.stringify(requestOptions, null, 2),
+		);
+	}
+
+	/* 	console.log('[Ropofy] addLocationIdPreSendAction - FINAL:', {
 		qs: requestOptions.qs,
 		body: requestOptions.body,
-	});
+	}); */
 
 	return requestOptions;
 }
@@ -308,15 +363,9 @@ export async function ropofyApiPagination(
 	let page = 1;
 
 	do {
-		console.log(
-			`[Ropofy] Pagination - Page: ${page}, Params:`,
-			JSON.stringify(requestData.options.qs),
-		);
+		// console.log(`[Ropofy] Pagination - Page: ${page}, Params:`, JSON.stringify(requestData.options.qs));
 		const pageResponseData: INodeExecutionData[] = await this.makeRoutingRequest(requestData);
-		console.log(
-			`[Ropofy] Pagination - Page: ${page}, Response:`,
-			JSON.stringify(pageResponseData[0]?.json),
-		);
+		// console.log(`[Ropofy] Pagination - Page: ${page}, Response:`, JSON.stringify(pageResponseData[0]?.json));
 		const items = pageResponseData[0].json[rootProperty] as [];
 		items.forEach((item) => responseData.push({ json: item }));
 
@@ -480,4 +529,243 @@ export async function addCustomFieldsPreSendAction(
 	}
 
 	return requestOptions;
+}
+
+// Utilidad para formatear fecha a ISO con milisegundos y Z
+function toIsoWithMillisZ(date: string) {
+	if (!date) return date;
+	const d = new Date(date);
+	return d.toISOString();
+}
+
+// --- NUEVA FUNCIÓN: preSend para /contacts/search ---
+export async function contactSearchPreSendAction(
+	this: IExecuteSingleFunctions,
+	requestOptions: IHttpRequestOptions,
+): Promise<IHttpRequestOptions> {
+	const { locationId } =
+		((await this.getCredentials('ropofyOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+
+	// Solo para la acción 'search' de contactos
+	const resource = this.getNodeParameter('resource') as string;
+	const operation = this.getNodeParameter('operation') as string;
+	if (resource !== 'contact' || operation !== 'search') return requestOptions;
+
+	// Leer parámetros
+	const page = this.getNodeParameter('page', 1) as number;
+	const pageLimit = this.getNodeParameter('pageLimit', 20) as number;
+	const searchAfterRaw = this.getNodeParameter('searchAfter', '') as string;
+	const sort = this.getNodeParameter('sort', {}) as any;
+	const filtersRaw = this.getNodeParameter('filters', {}) as any;
+	const dateFilters = this.getNodeParameter('dateFilters', {}) as any;
+
+	// searchAfter puede ser string separado por coma o array
+	let searchAfter: string[] = [];
+	if (typeof searchAfterRaw === 'string' && searchAfterRaw.trim() !== '') {
+		try {
+			const parsed = JSON.parse(searchAfterRaw);
+			if (Array.isArray(parsed)) {
+				searchAfter = parsed;
+			} else {
+				searchAfter = searchAfterRaw
+					.split(',')
+					.map((s) => s.trim())
+					.filter(Boolean);
+			}
+		} catch {
+			searchAfter = searchAfterRaw
+				.split(',')
+				.map((s) => s.trim())
+				.filter(Boolean);
+		}
+	}
+
+	// --- 1. Procesar filtros avanzados (filters) ---
+	const filterArray: any[] = [];
+	if (filtersRaw && typeof filtersRaw === 'object' && (filtersRaw.filter || filtersRaw.group)) {
+		const filtersList = [];
+		if (Array.isArray(filtersRaw.filter)) {
+			filtersList.push(...filtersRaw.filter);
+		} else if (filtersRaw.filter) {
+			filtersList.push(filtersRaw.filter);
+		}
+		if (Array.isArray(filtersRaw.group)) {
+			filtersList.push(...filtersRaw.group);
+		} else if (filtersRaw.group) {
+			filtersList.push(filtersRaw.group);
+		}
+		for (const f of filtersList) {
+			if (f.field && f.operator) {
+				// Filtro simple
+				let value: any = f.value;
+				try {
+					value = JSON.parse(f.value);
+				} catch {}
+				filterArray.push({ field: f.field, operator: f.operator, value });
+			} else if (f.group && f.filters) {
+				// Grupo
+				let groupFilters: any = f.filters;
+				if (typeof groupFilters === 'string') {
+					try {
+						groupFilters = JSON.parse(groupFilters);
+					} catch {}
+				}
+				filterArray.push({ group: f.group, filters: groupFilters });
+			}
+		}
+	}
+
+	// --- 2. Procesar filtros de fecha (dateFilters) ---
+	const startDate = dateFilters.startDate ? toIsoWithMillisZ(dateFilters.startDate) : undefined;
+	const endDate = dateFilters.endDate ? toIsoWithMillisZ(dateFilters.endDate) : undefined;
+	const filterByDateAdded = dateFilters.filterByDateAdded;
+	const filterByDateUpdated = dateFilters.filterByDateUpdated;
+
+	const dateRangeFilters: any[] = [];
+	if (startDate && endDate) {
+		if (filterByDateAdded) {
+			dateRangeFilters.push({
+				field: 'dateAdded',
+				operator: 'range',
+				value: { gt: startDate, lt: endDate },
+			});
+		}
+		if (filterByDateUpdated) {
+			dateRangeFilters.push({
+				field: 'dateUpdated',
+				operator: 'range',
+				value: { gt: startDate, lt: endDate },
+			});
+		}
+	}
+	if (dateRangeFilters.length > 1) {
+		filterArray.push({ group: 'OR', filters: dateRangeFilters });
+	} else if (dateRangeFilters.length === 1) {
+		filterArray.push(dateRangeFilters[0]);
+	}
+
+	// --- 3. Sort ---
+	let sortBody: any[] = [];
+	if (sort && typeof sort === 'object' && sort.sort) {
+		if (Array.isArray(sort.sort)) {
+			sortBody = sort.sort;
+		} else {
+			sortBody = [sort.sort];
+		}
+	}
+
+	// --- 4. Armar el body final ---
+	requestOptions.body = {
+		locationId,
+		page,
+		pageLimit,
+		...(searchAfter.length > 0 ? { searchAfter } : {}),
+		...(filterArray.length > 0 ? { filters: filterArray } : {}),
+		...(sortBody.length > 0 ? { sort: sortBody } : {}),
+	};
+
+	// DEBUG: Mostrar el body final antes de retornar
+	console.log(
+		'[Ropofy][DEBUG][SearchContacts] Body enviado:',
+		JSON.stringify(requestOptions.body, null, 2),
+	);
+
+	return requestOptions;
+}
+
+// --- NUEVA FUNCIÓN: paginación para /contacts/search ---
+export async function ropofyApiSearchPagination(
+	this: IExecutePaginationFunctions,
+	requestData: DeclarativeRestApiSettings.ResultOptions,
+): Promise<INodeExecutionData[]> {
+	const responseData: INodeExecutionData[] = [];
+	const resource = this.getNodeParameter('resource') as string;
+	const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+	const delayPagination = this.getNodeParameter('delayPagination', 0) as number;
+	const rootProperty = 'contacts';
+	let baseBody = { ...requestData.options.body };
+	let page = 1;
+	let searchAfter: any[] = [];
+	do {
+		console.log(`page${page}`);
+		const body = {
+			...baseBody,
+			page,
+			...(searchAfter.length > 0 ? { searchAfter } : {}),
+		};
+		requestData.options.body = body;
+		try {
+			const pageResponseData: INodeExecutionData[] = await this.makeRoutingRequest(requestData);
+			console.log(
+				'[Ropofy][DEBUG][SearchContacts] Respuesta HighLevel:',
+				JSON.stringify(pageResponseData[0]?.json, null, 2),
+			);
+			if (!pageResponseData || pageResponseData.length === 0 || !pageResponseData[0]?.json) {
+				break;
+			}
+			const responseJson = pageResponseData[0].json as IDataObject;
+			if (responseJson.error || responseJson.message) {
+				break;
+			}
+			const items = responseJson[rootProperty] as any[];
+			if (items && Array.isArray(items)) {
+				items.forEach((item) => responseData.push({ json: item }));
+				if (items.length > 0 && items[items.length - 1].searchAfter) {
+					searchAfter = items[items.length - 1].searchAfter;
+				} else {
+					searchAfter = [];
+				}
+			} else {
+				searchAfter = [];
+			}
+			page++;
+			if (returnAll && searchAfter.length > 0 && delayPagination > 0) {
+				await sleep(delayPagination);
+			}
+		} catch (error) {
+			break;
+		}
+	} while (returnAll && searchAfter.length > 0);
+	return responseData;
+}
+
+export async function ropofyApiMessagesPagination(
+	this: IExecutePaginationFunctions,
+	requestData: DeclarativeRestApiSettings.ResultOptions,
+): Promise<INodeExecutionData[]> {
+	const responseData: INodeExecutionData[] = [];
+	const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+	const limit = this.getNodeParameter('limit', 20) as number;
+	let lastMessageId = this.getNodeParameter('lastMessageId', '') as string;
+	let totalFetched = 0;
+	let page = 1;
+	do {
+		console.log(`page${page} messages`);
+		if (lastMessageId) {
+			requestData.options.qs = { ...requestData.options.qs, lastMessageId };
+		}
+		const pageResponseData: INodeExecutionData[] = await this.makeRoutingRequest(requestData);
+		if (!pageResponseData || pageResponseData.length === 0 || !pageResponseData[0]?.json) {
+			break;
+		}
+		const responseJson = pageResponseData[0].json as any;
+		console.log('Respuesta mensajes:', JSON.stringify(responseJson, null, 2));
+		const items = responseJson.messages?.messages as any[];
+		if (items && Array.isArray(items) && items.length > 0) {
+			items.forEach((item) => responseData.push({ json: item }));
+			totalFetched += items.length;
+			lastMessageId = responseJson.messages?.lastMessageId;
+		} else {
+			break;
+		}
+		if (
+			!returnAll ||
+			(limit && totalFetched >= limit) ||
+			responseJson.messages?.nextPage === false
+		) {
+			break;
+		}
+		page++;
+	} while (true);
+	return responseData;
 }
