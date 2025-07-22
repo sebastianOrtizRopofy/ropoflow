@@ -2,8 +2,8 @@ import type { INodeProperties } from 'n8n-workflow';
 
 import {
 	addLocationIdPreSendAction,
-	dateTimeToEpochPreSendAction,
 	splitTagsPreSendAction,
+	dateTimeToMMDDYYYYPreSendAction,
 } from '../GenericFunctions';
 
 export const opportunityOperations: INodeProperties[] = [
@@ -429,7 +429,7 @@ const getAllProperties: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'endDate',
-						preSend: [dateTimeToEpochPreSendAction],
+						preSend: [dateTimeToMMDDYYYYPreSendAction],
 					},
 				},
 			},
@@ -478,7 +478,7 @@ const getAllProperties: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'date',
-						preSend: [dateTimeToEpochPreSendAction],
+						preSend: [dateTimeToMMDDYYYYPreSendAction],
 					},
 				},
 			},

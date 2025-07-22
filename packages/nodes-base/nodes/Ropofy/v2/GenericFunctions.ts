@@ -258,7 +258,13 @@ export async function ropofyApiRequest(
 		delete options.qs;
 	}
 	options = Object.assign({}, options, option);
-	return await this.helpers.httpRequestWithAuthentication.call(this, 'ropofyOAuth2Api', options);
+	const response = await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'ropofyOAuth2Api',
+		options,
+	);
+	//console.log('[Ropofy][DEBUG][ropofyApiRequest] Raw response:', JSON.stringify(response, null, 2));
+	return response;
 }
 
 export const addNotePostReceiveAction = async function (
@@ -355,6 +361,8 @@ export async function ropofyApiPagination(
 		baseQs = {
 			location_id: requestData.options.qs.location_id,
 			limit: requestData.options.qs.limit,
+			date: requestData.options.qs.date,
+			endDate: requestData.options.qs.endDate,
 		};
 	}
 	// --- FIN DEL FIX PARA CONTACT Y OPPORTUNITY ---
@@ -365,11 +373,13 @@ export async function ropofyApiPagination(
 	do {
 		// console.log(`[Ropofy] Pagination - Page: ${page}, Params:`, JSON.stringify(requestData.options.qs));
 		const pageResponseData: INodeExecutionData[] = await this.makeRoutingRequest(requestData);
+		// console.log('[Ropofy][DEBUG][ropofyApiPagination] Respuesta cruda:', JSON.stringify(pageResponseData, null, 2));
 		// console.log(`[Ropofy] Pagination - Page: ${page}, Response:`, JSON.stringify(pageResponseData[0]?.json));
 		const items = pageResponseData[0].json[rootProperty] as [];
 		items.forEach((item) => responseData.push({ json: item }));
 
 		const meta = pageResponseData[0].json.meta as IDataObject;
+		console.log('[Ropofy][DEBUG][ropofyApiPagination] meta.total:', meta?.total);
 		const startAfterId = meta.startAfterId as string;
 		const startAfter = meta.startAfter as number;
 
@@ -386,6 +396,8 @@ export async function ropofyApiPagination(
 				startAfterId,
 				startAfter,
 			};
+
+			console.log(requestData.options.qs);
 		} else {
 			requestData.options.qs = { startAfterId, startAfter };
 		}
@@ -536,6 +548,33 @@ function toIsoWithMillisZ(date: string) {
 	if (!date) return date;
 	const d = new Date(date);
 	return d.toISOString();
+}
+
+// Convierte una fecha a mm-dd-yyyy
+export async function dateTimeToMMDDYYYYPreSendAction(
+	this: IExecuteSingleFunctions,
+	requestOptions: IHttpRequestOptions,
+): Promise<IHttpRequestOptions> {
+	const qs = (requestOptions.qs ?? {}) as {
+		startDate?: string;
+		endDate?: string;
+		date?: string;
+	};
+	const toMMDDYYYY = (dt: string) => {
+		if (!dt) return dt;
+		const d = new Date(dt);
+		const mm = String(d.getMonth() + 1).padStart(2, '0');
+		const dd = String(d.getDate()).padStart(2, '0');
+		const yyyy = d.getFullYear();
+		return `${mm}-${dd}-${yyyy}`;
+	};
+	if (qs.startDate) qs.startDate = toMMDDYYYY(qs.startDate);
+	if (qs.endDate) qs.endDate = toMMDDYYYY(qs.endDate);
+	if (qs.date) qs.date = toMMDDYYYY(qs.date);
+
+	console.log('[Ropofy][DEBUG][dateTimeToMMDDYYYYPreSendAction] qs enviados:', JSON.stringify(qs));
+
+	return requestOptions;
 }
 
 // --- NUEVA FUNCIÓN: preSend para /contacts/search ---
@@ -768,4 +807,26 @@ export async function ropofyApiMessagesPagination(
 		page++;
 	} while (true);
 	return responseData;
+}
+
+export async function getContactCustom(
+	this: IExecuteSingleFunctions,
+	item: INodeExecutionData,
+	index: number,
+): Promise<INodeExecutionData[]> {
+	const contactId = this.getNodeParameter('contactId', index) as string;
+	const response = await this.helpers.httpRequestWithAuthentication.call(this, 'ropofyOAuth2Api', {
+		method: 'GET',
+		url: `https://services.leadconnectorhq.com/contacts/${contactId}/`,
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+			Version: '2021-07-28',
+		},
+	});
+	console.log('[Ropofy][DEBUG][getContactCustom] Raw response:', JSON.stringify(response, null, 2));
+	if (!response || !response.contact) {
+		throw new ApplicationError('No contact found in response');
+	}
+	return [{ json: response.contact }];
 }
