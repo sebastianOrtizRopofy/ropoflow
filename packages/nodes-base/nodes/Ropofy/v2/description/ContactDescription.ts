@@ -83,7 +83,20 @@ export const contactOperations: INodeProperties[] = [
 				name: 'Get',
 				value: 'get',
 				routing: {
-					execute: 'getContactCustom',
+					request: {
+						method: 'GET',
+						url: '=/contacts/{{$parameter.contactId}}/',
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'contact',
+								},
+							},
+						],
+					},
 				},
 				action: 'Get a contact',
 			},

@@ -12,10 +12,10 @@ import { NodeConnectionTypes } from 'n8n-workflow';
 
 import { calendarFields, calendarOperations } from './description/CalendarDescription';
 import { contactFields, contactNotes, contactOperations } from './description/ContactDescription';
-import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
-import { taskFields, taskOperations } from './description/TaskDescription';
 import { conversationOperations, conversationFields } from './description/ConversationDescription';
 import { messageOperations, messageFields } from './description/MessageDescription';
+import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
+import { taskFields, taskOperations } from './description/TaskDescription';
 import {
 	getContacts,
 	getPipelines,
@@ -23,6 +23,8 @@ import {
 	getUsers,
 	ropofyApiPagination,
 } from './GenericFunctions';
+
+console.log('[Ropofy][DEBUG] RopofyV2.node.ts loaded');
 
 const resources: INodeProperties[] = [
 	{
@@ -32,20 +34,12 @@ const resources: INodeProperties[] = [
 		noDataExpression: true,
 		options: [
 			{
-				name: 'Contact',
-				value: 'contact',
-			},
-			{
-				name: 'Opportunity',
-				value: 'opportunity',
-			},
-			{
-				name: 'Task',
-				value: 'task',
-			},
-			{
 				name: 'Calendar',
 				value: 'calendar',
+			},
+			{
+				name: 'Contact',
+				value: 'contact',
 			},
 			{
 				name: 'Conversation',
@@ -54,6 +48,14 @@ const resources: INodeProperties[] = [
 			{
 				name: 'Message',
 				value: 'message',
+			},
+			{
+				name: 'Opportunity',
+				value: 'opportunity',
+			},
+			{
+				name: 'Task',
+				value: 'task',
 			},
 		],
 		default: 'contact',
@@ -114,6 +116,7 @@ export class RopofyV2 implements INodeType {
 	description: INodeTypeDescription;
 
 	constructor(baseDescription: INodeTypeBaseDescription) {
+		console.log('[Ropofy][DEBUG] RopofyV2 node loaded');
 		this.description = {
 			...baseDescription,
 			...versionDescription,

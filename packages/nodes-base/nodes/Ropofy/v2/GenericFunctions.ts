@@ -1,3 +1,4 @@
+console.log('[Ropofy][DEBUG] GenericFunctions.ts loaded');
 import { DateTime } from 'luxon';
 import type { ToISOTimeOptions } from 'luxon';
 import type {
@@ -815,14 +816,23 @@ export async function getContactCustom(
 	index: number,
 ): Promise<INodeExecutionData[]> {
 	const contactId = this.getNodeParameter('contactId', index) as string;
+	const url = `https://services.leadconnectorhq.com/contacts/${contactId}/`;
+	const headers = {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		Version: '2021-07-28',
+	};
+	console.log('[Ropofy][DEBUG][getContactCustom] contactId:', contactId);
+	console.log('[Ropofy][DEBUG][getContactCustom] URL:', url);
+	console.log('[Ropofy][DEBUG][getContactCustom] Request:', {
+		method: 'GET',
+		url,
+		headers,
+	});
 	const response = await this.helpers.httpRequestWithAuthentication.call(this, 'ropofyOAuth2Api', {
 		method: 'GET',
-		url: `https://services.leadconnectorhq.com/contacts/${contactId}/`,
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			Version: '2021-07-28',
-		},
+		url,
+		headers,
 	});
 	console.log('[Ropofy][DEBUG][getContactCustom] Raw response:', JSON.stringify(response, null, 2));
 	if (!response || !response.contact) {
