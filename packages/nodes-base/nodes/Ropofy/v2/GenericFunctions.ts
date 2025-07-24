@@ -133,13 +133,13 @@ export async function addLocationIdPreSendAction(
 	const resource = this.getNodeParameter('resource') as string;
 	const operation = this.getNodeParameter('operation') as string;
 
-	/* console.log('[Ropofy] addLocationIdPreSendAction:', {
+	console.log('[Ropofy] addLocationIdPreSendAction:', {
 		locationId,
 		resource,
 		operation,
 		qs: requestOptions.qs,
 		body: requestOptions.body,
-	}); */
+	});
 
 	if (resource === 'contact') {
 		if (operation === 'getAll') {
@@ -196,6 +196,27 @@ export async function addLocationIdPreSendAction(
 		if (operation === 'create') {
 			requestOptions.body = requestOptions.body ?? {};
 			Object.assign(requestOptions.body, { locationId });
+		}
+		if (operation === 'update') {
+			requestOptions.body = requestOptions.body ?? {};
+			// ✅ Verificamos si viene en el formato incorrecto y lo transformamos
+			if (
+				requestOptions.body.customFields &&
+				requestOptions.body.customFields.values &&
+				Array.isArray(requestOptions.body.customFields.values)
+			) {
+				requestOptions.body.customFields = requestOptions.body.customFields.values.map((item) => ({
+					id: item.fieldId.value,
+					key: item.fieldId.cachedResultName,
+					field_value: item.fieldValue,
+				}));
+			}
+
+			console.log('[Ropofy][DEBUG][updateContact] URL:', requestOptions.url);
+			console.log(
+				'[Ropofy][DEBUG][updateContact] Body:',
+				JSON.stringify(requestOptions.body, null, 2),
+			);
 		}
 	}
 

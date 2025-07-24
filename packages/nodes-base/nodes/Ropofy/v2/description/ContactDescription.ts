@@ -124,7 +124,11 @@ export const contactOperations: INodeProperties[] = [
 						url: '=/contacts/{{$parameter.contactId}}/',
 					},
 					send: {
-						preSend: [validEmailAndPhonePreSendAction, splitTagsPreSendAction],
+						preSend: [
+							validEmailAndPhonePreSendAction,
+							splitTagsPreSendAction,
+							addLocationIdPreSendAction,
+						],
 					},
 					output: {
 						postReceive: [
