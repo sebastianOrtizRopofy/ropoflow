@@ -35,6 +35,9 @@ ENV N8N_BASIC_AUTH_ACTIVE=true
 ENV N8N_BASIC_AUTH_USER=admin
 ENV N8N_BASIC_AUTH_PASSWORD=admin
 
+# tiempos de guardado de registros de ejecucion
+ENV EXECUTIONS_DATA_MAX_AGE=720
+
 # Configuración de la base de datos
 ENV DB_TYPE=postgresdb
 ENV DB_POSTGRESDB_DATABASE=ropoflow-prod
