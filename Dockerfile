@@ -37,6 +37,7 @@ ENV N8N_BASIC_AUTH_PASSWORD=admin
 
 # tiempos de guardado de registros de ejecucion
 ENV EXECUTIONS_DATA_MAX_AGE=720
+ENV EXECUTIONS_DATA_PRUNE_MAX_COUNT=450000
 
 # Configuración de la base de datos
 ENV DB_TYPE=postgresdb
