@@ -1520,14 +1520,14 @@ export class WorkflowExecute {
 					let maxTries = 1;
 					if (executionData.node.retryOnFail === true) {
 						// TODO: Remove the hardcoded default-values here and also in NodeSettings.vue
-						maxTries = Math.min(5, Math.max(2, executionData.node.maxTries || 3));
+						maxTries = Math.min(20, Math.max(2, executionData.node.maxTries || 3));
 					}
 
 					let waitBetweenTries = 0;
 					if (executionData.node.retryOnFail === true) {
 						// TODO: Remove the hardcoded default-values here and also in NodeSettings.vue
 						waitBetweenTries = Math.min(
-							5000,
+							20000,
 							Math.max(0, executionData.node.waitBetweenTries || 1000),
 						);
 					}

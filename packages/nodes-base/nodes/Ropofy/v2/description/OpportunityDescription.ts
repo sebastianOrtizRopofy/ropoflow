@@ -121,13 +121,11 @@ const pipelineId: INodeProperties = {
 
 const createProperties: INodeProperties[] = [
 	{
-		// eslint-disable-next-line n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options
-		displayName: 'Contact Email or ID',
+		displayName: 'Contact',
 		name: 'contactId',
 		required: true,
-		type: 'options',
-		description:
-			'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+		type: 'resourceLocator',
+		description: 'Select from list or enter the Contact ID directly',
 		hint: 'There can only be one opportunity for each contact',
 		displayOptions: {
 			show: {
@@ -135,14 +133,29 @@ const createProperties: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		typeOptions: {
-			loadOptionsMethod: 'getContacts',
-		},
-		default: '',
+		default: { mode: 'list', value: '' },
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				typeOptions: {
+					searchListMethod: 'searchContacts',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter Contact ID',
+			},
+		],
 		routing: {
 			send: {
 				type: 'body',
 				property: 'contactId',
+				value: '={{ $parameter.contactId?.value ?? $value ?? $parameter.contactId }}',
 			},
 		},
 	},

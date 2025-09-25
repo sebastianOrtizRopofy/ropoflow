@@ -131,6 +131,47 @@ export class RopofyV2 implements INodeType {
 			getUsers,
 		},
 		listSearch: {
+			async searchContacts(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const { locationId } =
+					((await this.getCredentials('ropofyOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+
+				const responseData: IDataObject = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'ropofyOAuth2Api',
+					{
+						url: 'https://services.leadconnectorhq.com/contacts/',
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+							Version: '2021-07-28',
+						},
+						qs: {
+							locationId,
+						},
+					},
+				)) as IDataObject;
+
+				const contacts =
+					(responseData.contacts as Array<{ id: string; email: string; name?: string }>) ?? [];
+				const normalized = contacts.map((c) => ({ name: c.email ?? c.name ?? c.id, value: c.id }));
+				const filtered = !filter
+					? normalized
+					: normalized.filter(
+							(c) =>
+								c.name.toLowerCase().includes(filter.toLowerCase()) ||
+								c.value.toLowerCase().includes(filter.toLowerCase()),
+						);
+				const results: INodeListSearchItems[] = filtered.sort((a, b) => {
+					if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+					if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+					return 0;
+				});
+
+				return { results };
+			},
 			async searchCustomFields(
 				this: ILoadOptionsFunctions,
 				filter?: string,
