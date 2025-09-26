@@ -369,7 +369,7 @@ const createProperties: INodeProperties[] = [
 								type: 'json',
 								default: '[]',
 								description:
-									'Enter a JSON array of custom fields. Example: [{"ID": "field-ID-1", "field_value": "value1"}, {"ID": "field-ID-2", "field_value": "value2"}].',
+									'Enter a JSON array of custom fields. Example: [{"id": "field-id-1", "key": "opportunity.field_name", "field_value": "value1"}].',
 								routing: {
 									send: {
 										type: 'body',
