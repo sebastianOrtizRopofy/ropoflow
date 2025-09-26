@@ -359,6 +359,27 @@ const createProperties: INodeProperties[] = [
 							},
 						],
 					},
+					{
+						name: 'manualArray',
+						displayName: 'Manual Array',
+						values: [
+							{
+								displayName: 'Custom Fields Array',
+								name: 'customFieldsArray',
+								type: 'json',
+								default: '[]',
+								description:
+									'Enter a JSON array of custom fields. Example: [{"ID": "field-ID-1", "field_value": "value1"}, {"ID": "field-ID-2", "field_value": "value2"}].',
+								routing: {
+									send: {
+										type: 'body',
+										property: 'customFields',
+										value: '={{ JSON.parse($value) }}',
+									},
+								},
+							},
+						],
+					},
 				],
 				routing: {
 					send: {
