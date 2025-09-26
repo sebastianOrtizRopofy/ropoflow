@@ -4,6 +4,7 @@ import {
 	addLocationIdPreSendAction,
 	splitTagsPreSendAction,
 	dateTimeToMMDDYYYYPreSendAction,
+	addCustomFieldsPreSendAction,
 } from '../GenericFunctions';
 
 export const opportunityOperations: INodeProperties[] = [
@@ -285,21 +286,102 @@ const createProperties: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Stage Name or ID',
-				name: 'stageId',
-				type: 'options',
-				description:
-					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
-
-				default: '',
-				typeOptions: {
-					loadOptionsDependsOn: ['/pipelineId'],
-					loadOptionsMethod: 'getPipelineStages',
+				displayName: 'Custom Fields',
+				name: 'customFields',
+				placeholder: 'Add Field',
+				type: 'fixedCollection',
+				default: {},
+				typeOptions: { multipleValues: true },
+				options: [
+					{
+						name: 'values',
+						displayName: 'Value',
+						values: [
+							{
+								displayName: 'Field Name or ID',
+								name: 'fieldId',
+								required: true,
+								type: 'resourceLocator',
+								default: '',
+								description: 'Choose from the list, or specify an ID using an expression',
+								modes: [
+									{
+										displayName: 'List',
+										name: 'list',
+										type: 'list',
+										typeOptions: {
+											searchListMethod: 'searchOpportunityCustomFields',
+											searchable: true,
+										},
+									},
+									{
+										displayName: 'ID',
+										name: 'id',
+										type: 'string',
+										placeholder: 'Enter Custom Field ID',
+									},
+								],
+							},
+							{
+								displayName: 'Field Value',
+								name: 'fieldValue',
+								type: 'string',
+								default: '',
+								routing: {
+									send: {
+										type: 'body',
+										property: 'customFields',
+										value:
+											'={{ $parent.values.map(field => ({ id: field.fieldId.id, field_value: field.fieldValue })) }}',
+									},
+								},
+							},
+						],
+					},
+				],
+				routing: {
+					send: {
+						type: 'body',
+						property: 'customFields',
+						preSend: [addCustomFieldsPreSendAction],
+					},
 				},
+			},
+			{
+				displayName: 'Stage',
+				name: 'stageId',
+				required: true,
+				type: 'resourceLocator',
+				description: 'Select from list or enter the Stage ID directly',
+				displayOptions: {
+					show: {
+						resource: ['opportunity'],
+						operation: ['create'],
+					},
+				},
+				default: { mode: 'list', value: '' },
+				modes: [
+					{
+						displayName: 'From List',
+						name: 'list',
+						type: 'list',
+						typeOptions: {
+							searchListMethod: 'searchPipelineStages',
+							searchable: true,
+						},
+					},
+					{
+						displayName: 'By ID',
+						name: 'id',
+						type: 'string',
+						placeholder: 'Enter Stage ID',
+					},
+				],
 				routing: {
 					send: {
 						type: 'body',
 						property: 'pipelineStageId',
+						value: '={{ $value }}',
 					},
 				},
 			},
@@ -378,6 +460,7 @@ const getAllProperties: INodeProperties[] = [
 		description: 'Max number of results to return',
 	},
 	{
+		// eslint-disable-next-line n8n-nodes-base/node-param-display-name-miscased
 		displayName: 'Delay Pagination (ms)',
 		name: 'delayPagination',
 		type: 'number',

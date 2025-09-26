@@ -131,6 +131,84 @@ export class RopofyV2 implements INodeType {
 			getUsers,
 		},
 		listSearch: {
+			async searchPipelineStages(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const { locationId } =
+					((await this.getCredentials('ropofyOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+
+				const pipelineId = this.getNodeParameter('pipelineId') as string;
+				if (!pipelineId) {
+					return { results: [] };
+				}
+
+				const responseData: IDataObject = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'ropofyOAuth2Api',
+					{
+						url: 'https://services.leadconnectorhq.com/pipelines/',
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+							Version: '2021-07-28',
+						},
+						qs: { locationId },
+					},
+				)) as IDataObject;
+
+				const pipelines =
+					(responseData.pipelines as Array<{
+						id: string;
+						stages: Array<{ id: string; name: string }>;
+					}>) ?? [];
+				const targetPipeline = pipelines.find((p) => p.id === pipelineId);
+				const stages = targetPipeline?.stages ?? [];
+
+				const results: INodeListSearchItems[] = stages
+					.map((stage) => ({ name: stage.name, value: stage.id }))
+					.filter((stage) => !filter || stage.name.toLowerCase().includes(filter.toLowerCase()))
+					.sort((a, b) => {
+						if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+						if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+						return 0;
+					});
+
+				return { results };
+			},
+			async searchOpportunityCustomFields(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const { locationId } =
+					((await this.getCredentials('ropofyOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+
+				const responseData: IDataObject = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'ropofyOAuth2Api',
+					{
+						// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+						url: `https://services.leadconnectorhq.com/locations/${locationId}/customFields?model=opportunity`,
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+							Version: '2021-07-28',
+						},
+					},
+				)) as IDataObject;
+
+				const customFields = responseData.customFields as Array<{ name: string; id: string }>;
+				const results: INodeListSearchItems[] = customFields
+					.map((a) => ({ name: a.name, value: a.id }))
+					.filter((a) => !filter || a.name.toLowerCase().includes(filter.toLowerCase()))
+					.sort((a, b) => {
+						if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+						if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+						return 0;
+					});
+
+				return { results };
+			},
 			async searchContacts(
 				this: ILoadOptionsFunctions,
 				filter?: string,
