@@ -147,7 +147,7 @@ export class RopofyV2 implements INodeType {
 					this,
 					'ropofyOAuth2Api',
 					{
-						url: 'https://services.leadconnectorhq.com/pipelines/',
+						url: 'https://services.leadconnectorhq.com/opportunities/pipelines',
 						headers: {
 							Accept: 'application/json',
 							'Content-Type': 'application/json',
