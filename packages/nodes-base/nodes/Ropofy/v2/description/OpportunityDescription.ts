@@ -217,6 +217,44 @@ const createProperties: INodeProperties[] = [
 		},
 	},
 	{
+		displayName: 'Stage',
+		name: 'stageId',
+		required: true,
+		type: 'resourceLocator',
+		description: 'Select from list or enter the Stage ID directly',
+		displayOptions: {
+			show: {
+				resource: ['opportunity'],
+				operation: ['create'],
+			},
+		},
+		default: { mode: 'list', value: '' },
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				typeOptions: {
+					searchListMethod: 'searchPipelineStages',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter Stage ID',
+			},
+		],
+		routing: {
+			send: {
+				type: 'body',
+				property: 'pipelineStageId',
+				value: '={{ $value }}',
+			},
+		},
+	},
+	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
 		type: 'collection',
@@ -344,44 +382,6 @@ const createProperties: INodeProperties[] = [
 						type: 'body',
 						property: 'customFields',
 						preSend: [addCustomFieldsPreSendAction],
-					},
-				},
-			},
-			{
-				displayName: 'Stage',
-				name: 'stageId',
-				required: true,
-				type: 'resourceLocator',
-				description: 'Select from list or enter the Stage ID directly',
-				displayOptions: {
-					show: {
-						resource: ['opportunity'],
-						operation: ['create'],
-					},
-				},
-				default: { mode: 'list', value: '' },
-				modes: [
-					{
-						displayName: 'From List',
-						name: 'list',
-						type: 'list',
-						typeOptions: {
-							searchListMethod: 'searchPipelineStages',
-							searchable: true,
-						},
-					},
-					{
-						displayName: 'By ID',
-						name: 'id',
-						type: 'string',
-						placeholder: 'Enter Stage ID',
-					},
-				],
-				routing: {
-					send: {
-						type: 'body',
-						property: 'pipelineStageId',
-						value: '={{ $value }}',
 					},
 				},
 			},
