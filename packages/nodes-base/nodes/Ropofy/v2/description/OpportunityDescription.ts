@@ -217,40 +217,23 @@ const createProperties: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Stage',
+		displayName: 'Stage Name or ID',
 		name: 'stageId',
 		required: true,
-		type: 'resourceLocator',
-		description: 'Select from list or enter the Stage ID directly',
+		type: 'string',
+		description: 'Enter the stage name or ID directly',
 		displayOptions: {
 			show: {
 				resource: ['opportunity'],
 				operation: ['create'],
 			},
 		},
-		default: { mode: 'list', value: '' },
-		modes: [
-			{
-				displayName: 'From List',
-				name: 'list',
-				type: 'list',
-				typeOptions: {
-					searchListMethod: 'searchPipelineStages',
-					searchable: true,
-				},
-			},
-			{
-				displayName: 'By ID',
-				name: 'id',
-				type: 'string',
-				placeholder: 'Enter Stage ID',
-			},
-		],
+		default: '',
+		placeholder: 'e.g. Qualified or stage-ID-123',
 		routing: {
 			send: {
 				type: 'body',
 				property: 'pipelineStageId',
-				value: '={{ $value }}',
 			},
 		},
 	},
