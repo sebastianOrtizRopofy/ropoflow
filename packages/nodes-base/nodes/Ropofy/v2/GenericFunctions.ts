@@ -145,10 +145,9 @@ export async function addLocationIdPreSendAction(
 	console.log('[Ropofy] REQUEST DETAILS:');
 	console.log('URL:', requestOptions.url);
 	console.log('Method:', requestOptions.method);
-	console.log('Headers:', JSON.stringify(requestOptions.headers, null, 2));
-	console.log('Query String:', JSON.stringify(requestOptions.qs, null, 2));
-	console.log('Body:', JSON.stringify(requestOptions.body, null, 2));
-	console.log('Full Request Options:', JSON.stringify(requestOptions, null, 2));
+	console.log('Headers:', requestOptions.headers);
+	console.log('Query String:', requestOptions.qs);
+	console.log('Body:', requestOptions.body);
 
 	if (resource === 'contact') {
 		if (operation === 'getAll') {
