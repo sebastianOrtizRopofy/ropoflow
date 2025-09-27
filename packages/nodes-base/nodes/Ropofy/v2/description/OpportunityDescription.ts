@@ -234,6 +234,7 @@ const createProperties: INodeProperties[] = [
 			send: {
 				type: 'body',
 				property: 'pipelineStageId',
+				value: '={{ $value?.value ?? $value }}',
 			},
 		},
 	},
@@ -369,7 +370,7 @@ const createProperties: INodeProperties[] = [
 								type: 'json',
 								default: '[]',
 								description:
-									'Enter a JSON array of custom fields. Example: [{"id": "field-id-1", "key": "opportunity.field_name", "field_value": "value1"}].',
+									'Enter a JSON array of custom fields. Example: [{"ID": "field-ID-1", "key": "opportunity.field_name", "field_value": "value1"}].',
 								routing: {
 									send: {
 										type: 'body',
