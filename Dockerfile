@@ -6,8 +6,7 @@ RUN apt-get update && apt-get install -y \
     apt-get clean
 
 # Instalar pnpm
-RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=bash sh && \
-    ln -s /root/.local/share/pnpm/pnpm /usr/local/bin/pnpm
+RUN npm install -g pnpm
 
 # Definir directorio de trabajo
 WORKDIR /app
