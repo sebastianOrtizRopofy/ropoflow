@@ -1199,7 +1199,7 @@ export class WorkflowExecute {
 			const jsonCompatibleResult = isJsonCompatible(data);
 			if (!jsonCompatibleResult.isValid) {
 				Container.get(ErrorReporter).error(
-					new UnexpectedError('node execution output incorrect data'),
+					new UnexpectedError(`node execution output incorrect data. Flujo: ${workflow.name} (ID: ${workflow.id}), Nodo: ${node.name}`),
 					{
 						extra: {
 							nodeName: node.name,
