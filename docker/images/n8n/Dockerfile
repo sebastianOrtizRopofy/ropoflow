@@ -64,8 +64,13 @@ RUN ln -s /usr/local/lib/node_modules/n8n/bin/n8n /usr/local/bin/n8n && \
 RUN npm install -g npm@11.4.2
 RUN cd /usr/local/lib/node_modules/n8n/node_modules/pdfjs-dist && npm install @napi-rs/canvas
 
-EXPOSE 5678/tcp
-USER node
+# Install OpenSSH and su-exec for Azure App Service SSH support
+RUN apk add --no-cache openssh su-exec && \
+    echo "root:Docker!" | chpasswd
+COPY docker/images/n8n/sshd_config /etc/ssh/
+RUN ssh-keygen -A
+
+EXPOSE 5678/tcp 2222/tcp
 ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
 
 LABEL org.opencontainers.image.title="n8n" \

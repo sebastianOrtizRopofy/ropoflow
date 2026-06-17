@@ -6,10 +6,13 @@ if [ -d /opt/custom-certificates ]; then
   c_rehash /opt/custom-certificates
 fi
 
+# Start SSH server for Azure App Service
+/usr/sbin/sshd
+
 if [ "$#" -gt 0 ]; then
   # Got started with arguments
-  exec n8n "$@"
+  exec su-exec node n8n "$@"
 else
   # Got started without arguments
-  exec n8n
+  exec su-exec node n8n
 fi
