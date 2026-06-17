@@ -66,8 +66,14 @@ ENV N8N_ENCRYPTION_KEY=3kJ8o2SLXjHs7G1Nz9Bd6T0AqWmZ4yVc
 # Configuración de webhook público
 ENV WEBHOOK_URL="https://ropoflow-c4acfzgsbqa5bfad.canadacentral-01.azurewebsites.net/"
 
-# Exponer el puerto
-EXPOSE 5678
+# Instalar y configurar SSH para Azure
+RUN apt-get update && apt-get install -y openssh-server && \
+    mkdir -p /var/run/sshd && \
+    echo "root:Docker!" | chpasswd
+COPY docker/images/n8n/sshd_config /etc/ssh/sshd_config
 
-# Comando por defecto: lanzar n8n
-CMD ["node", "packages/cli/bin/n8n"]
+# Exponer el puerto
+EXPOSE 5678 2222
+
+# Comando por defecto: arrancar SSH y luego lanzar n8n
+CMD ["/bin/sh", "-c", "/usr/sbin/sshd && node packages/cli/bin/n8n"]
